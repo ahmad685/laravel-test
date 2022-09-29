@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -11,7 +12,8 @@ use Illuminate\Support\Facades\Date;
 
 class EventsController extends BaseController
 {
-    public function getWarmupEvents() {
+    public function getWarmupEvents()
+    {
         return Event::all();
     }
 
@@ -100,7 +102,8 @@ class EventsController extends BaseController
     ]
      */
 
-    public function getEventsWithWorkshops() {
+    public function getEventsWithWorkshops()
+    {
 
         $events = Event::with('workShops')->get();
         return response()->json($events);
@@ -181,7 +184,14 @@ class EventsController extends BaseController
     ```
      */
 
-    public function getFutureEventsWithWorkshops() {
-        throw new \Exception('implement in coding task 2');
+    public function getFutureEventsWithWorkshops()
+    {
+
+        $events = Event::with(['workShops' => function ($q) {
+            $q->where('workshops.start', '>', Carbon::now()->toDateTimeString());
+        }])->whereHas('workShops', function ($q) {
+            $q->where('workshops.start', '>', Carbon::now()->toDateTimeString());
+        })->get();
+        return response()->json($events);
     }
 }
